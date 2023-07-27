@@ -12,20 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG GOVERSION=1.11.1
-FROM golang:$GOVERSION-alpine as builder
+ARG BUILDPLATFORM
+ARG BASE_IMAGE
+
+ARG GOVERSION=1.20
+FROM golang:$GOVERSION as builder
 WORKDIR /go/src/sigs.k8s.io/sig-storage-local-static-provisioner
 ADD . .
 RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o local-volume-provisioner ./cmd/local-volume-provisioner
 
 # For security, we use kubernetes community maintained debian base image.
 # https://github.com/kubernetes/kubernetes/blob/master/build/debian-base/
-FROM k8s.gcr.io/debian-base-amd64:0.4.0
+FROM $BASE_IMAGE
 
+USER root
 # Keep packages up to date and install packages for our needs.
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && clean-install \
+RUN clean-apt install \
     util-linux \
     e2fsprogs \
     bash
