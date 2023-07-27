@@ -12,21 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# For security, we use kubernetes community maintained debian base image.
-# https://github.com/kubernetes/release/tree/master/images/build/debian-base
-FROM registry.k8s.io/build-image/debian-base:bullseye-v1.4.3
-ARG OS=linux
-ARG ARCH=amd64
-ARG binary=./_output/${OS}/${ARCH}/local-volume-provisioner
-COPY ${binary} /local-provisioner
+ARG BUILDPLATFORM
+ARG BASE_IMAGE
+ARG BUILDER_IMAGE 
 
+FROM $BUILDER_IMAGE as builder
+ENV GOFLAGS="-buildvcs=false"
+WORKDIR /go/src/DataDog/sig-storage-local-static-provisioner
+ADD . .
+RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o local-volume-provisioner ./cmd/local-volume-provisioner
+
+FROM $BASE_IMAGE
+
+USER root
 # Keep packages up to date and install packages for our needs.
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && clean-install \
+RUN clean-apt install \
     util-linux \
     e2fsprogs \
     bash
 
+COPY --from=builder /go/src/DataDog/sig-storage-local-static-provisioner/local-volume-provisioner /local-provisioner
 ADD deployment/docker/scripts /scripts
 ENTRYPOINT ["/local-provisioner"]
