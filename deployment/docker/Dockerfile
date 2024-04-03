@@ -14,7 +14,7 @@
 
 ARG BUILDPLATFORM
 ARG BASE_IMAGE
-ARG BUILDER_IMAGE 
+ARG BUILDER_IMAGE
 
 FROM $BUILDER_IMAGE as builder
 ENV GOFLAGS="-buildvcs=false"
@@ -23,6 +23,8 @@ ADD . .
 RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o local-volume-provisioner ./cmd/local-volume-provisioner
 
 FROM $BASE_IMAGE
+LABEL maintainers="Compute"
+LABEL description="Local Volume Provisioner"
 
 USER root
 # Keep packages up to date and install packages for our needs.
@@ -31,6 +33,6 @@ RUN clean-apt install \
     e2fsprogs \
     bash
 
-COPY --from=builder /go/src/DataDog/sig-storage-local-static-provisioner/local-volume-provisioner /local-provisioner
+COPY --from=builder /go/src/DataDog/sig-storage-local-static-provisioner/local-volume-provisioner /local-volume-provisioner
 ADD deployment/docker/scripts /scripts
-ENTRYPOINT ["/local-provisioner"]
+ENTRYPOINT ["/local-volume-provisioner"]
