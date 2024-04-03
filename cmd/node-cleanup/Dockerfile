@@ -12,10 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM gcr.io/distroless/static:latest
-ARG OS=linux
-ARG ARCH=amd64
-ARG binary=./_output/${OS}/${ARCH}/local-volume-node-cleanup
-COPY ${binary} main
+ARG BUILDPLATFORM
+ARG BASE_IMAGE
+ARG BUILDER_IMAGE
 
-ENTRYPOINT ["/main"]
+FROM $BUILDER_IMAGE as builder
+ENV GOFLAGS="-buildvcs=false"
+WORKDIR /go/src/DataDog/sig-storage-local-static-provisioner
+ADD . .
+RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o local-volume-cleanup-controller ./cmd/node-cleanup
+
+FROM $BASE_IMAGE
+LABEL maintainers="Compute"
+LABEL description="Local Volume Cleanup Controller"
+
+COPY --from=builder /go/src/DataDog/sig-storage-local-static-provisioner/local-volume-cleanup-controller /local-volume-cleanup-controller
+ENTRYPOINT ["/local-volume-cleanup-controller"]
