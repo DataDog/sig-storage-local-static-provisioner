@@ -1,0 +1,20 @@
+include: https://gitlab-templates.ddbuild.io/compute-delivery/v2/compute-delivery.yml
+
+test:
+  stage: verify
+  tags: [ "arch:amd64" ]
+  image: registry.ddbuild.io/images/mirror/golang:1.21
+  script:
+    - go test ./cmd/... ./pkg/... -v
+
+build-local-volume-provisioner:
+  variables:
+    IMAGE_NAME: "local-volume-provisioner"
+    EXTRA_ARGS: "-f deployment/docker/Dockerfile"
+  extends: .build-docker-image
+
+build-local-volume-cleanup-controller:
+  variables:
+    IMAGE_NAME: "local-volume-cleanup-controller"
+    EXTRA_ARGS: "-f cmd/node-cleanup/Dockerfile"
+  extends: .build-docker-image
