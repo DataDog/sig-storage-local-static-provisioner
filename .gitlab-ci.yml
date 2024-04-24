@@ -10,11 +10,11 @@ test:
 build-local-volume-provisioner:
   variables:
     IMAGE_NAME: "local-volume-provisioner"
-    EXTRA_ARGS: "-f deployment/docker/Dockerfile"
+    DOCKERFILE_NAME: "deployment/docker/Dockerfile"
   extends: .build-docker-image
 
 build-local-volume-cleanup-controller:
   variables:
     IMAGE_NAME: "local-volume-cleanup-controller"
-    EXTRA_ARGS: "-f cmd/node-cleanup/Dockerfile"
+    DOCKERFILE_NAME: "cmd/node-cleanup/Dockerfile"
   extends: .build-docker-image
