@@ -18,3 +18,15 @@ build-local-volume-cleanup-controller:
     IMAGE_NAME: "local-volume-cleanup-controller"
     EXTRA_ARGS: "-f cmd/node-cleanup/Dockerfile"
   extends: .build-docker-image
+
+bump-local-volume-provisioner-staging:
+  variables:
+    SLACK_CHANNEL: "compute-storage-ops"
+    CHART_NAME: "k8s-platform-local-volume-provisioner"
+  extends: .run-staging-campaign
+
+bump-local-volume-provisioner-prod:
+  variables:
+    SLACK_CHANNEL: "compute-storage-ops"
+    CHART_NAME: "k8s-platform-local-volume-provisioner"
+  extends: .run-prod-campaign
