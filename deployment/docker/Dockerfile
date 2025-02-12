@@ -25,10 +25,9 @@ ARG binary=./_output/${OS}/${ARCH}/local-volume-provisioner
 COPY ${binary} /local-provisioner
 
 FROM $BUILDER_IMAGE as builder
-ENV GOFLAGS="-buildvcs=false"
 WORKDIR /go/src/DataDog/sig-storage-local-static-provisioner
 ADD . .
-RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o local-volume-provisioner ./cmd/local-volume-provisioner
+RUN CGO_ENABLED=1 GOEXPERIMENT=boringcrypto go build -a -tags fips -o local-volume-provisioner ./cmd/local-volume-provisioner && go tool nm local-volume-provisioner | grep 'sig\.FIPSOnly'
 
 FROM $BASE_IMAGE
 LABEL maintainers="Compute"
