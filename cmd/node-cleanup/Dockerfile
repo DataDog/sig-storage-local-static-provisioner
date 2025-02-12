@@ -17,10 +17,9 @@ ARG BASE_IMAGE
 ARG BUILDER_IMAGE
 
 FROM $BUILDER_IMAGE as builder
-ENV GOFLAGS="-buildvcs=false"
 WORKDIR /go/src/DataDog/sig-storage-local-static-provisioner
 ADD . .
-RUN CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o local-volume-cleanup-controller ./cmd/node-cleanup
+RUN CGO_ENABLED=1 GOEXPERIMENT=boringcrypto go build -a -tags fips -o local-volume-cleanup-controller ./cmd/node-cleanup && go tool nm local-volume-cleanup-controller | grep 'sig\.FIPSOnly'
 
 FROM $BASE_IMAGE
 LABEL maintainers="Compute"
