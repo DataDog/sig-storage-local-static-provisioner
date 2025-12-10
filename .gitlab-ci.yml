@@ -15,6 +15,12 @@ build-local-volume-provisioner:
     EXTRA_ARGS: "-f deployment/docker/Dockerfile"
   extends: .build-docker-image
 
+build-local-volume-provisioner-nydus-image:
+  needs: ["build-local-volume-provisioner"]
+  variables:
+    IMAGE_NAME: "local-volume-provisioner"
+  extends: .build-nydus-image
+
 build-local-volume-cleanup-controller:
   variables:
     IMAGE_NAME: "local-volume-cleanup-controller"
