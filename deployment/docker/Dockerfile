@@ -33,7 +33,8 @@ FROM $BASE_IMAGE
 LABEL maintainers="Compute"
 LABEL description="Local Volume Provisioner"
 
-USER root
+# the UID of user root is 0
+USER 0
 # Keep packages up to date and install packages for our needs.
 RUN clean-apt install \
     util-linux \
