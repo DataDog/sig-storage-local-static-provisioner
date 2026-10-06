@@ -6,6 +6,8 @@ on:
   pull_request:
 jobs:
   build:
+    # The Datadog Dockerfile requires private images supplied by DDCI.
+    if: github.event_name != 'pull_request' || github.base_ref != 'datadog'
     name: Build
     runs-on: ubuntu-latest
     steps:
@@ -35,4 +37,3 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
-
